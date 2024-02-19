@@ -8,15 +8,15 @@ board into a final configuration (goal state) with a minimum number of actions.
 ## Please note
 All logic and instructions provided below assume that Part2.zip and Part3.zip have been extracted and are available in the directory structure as follows:
 
-Lab1/\
-|-- code/\
-|     |__ (all logic files and notebooks)\
-|-- Part2/\
-|     |__ (all files/states for part 2 of the lab)\
-|-- Part3/\
-      |__ L8/\
-      |__ L15/\
-      |__ L24/
+Lab1/
+├── code/
+│   └── (all logic files and notebooks)
+├── Part2/
+│   └── (all files/states for part 2 of the lab)
+└── Part3/
+    ├── L8/
+    ├── L15/
+    └── L24/
 
 ## Usage
 
