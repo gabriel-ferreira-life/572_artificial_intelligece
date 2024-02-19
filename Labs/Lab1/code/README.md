@@ -1,28 +1,26 @@
-# Project Title
+# Lab1: The 8-puzzle
 
-## Lab1: The 8-puzzle
-
-### Problem Description
+## Problem Description
 In this programming assignment, you will write a code to solve 8-puzzle problems. The objective
 of the puzzle is to rearrange a given initial configuration (starting state) of 8 numbers on a 3 x 3
 board into a final configuration (goal state) with a minimum number of actions.
 
-### Please note
+## Please note
 All logic and instructions provided below assume that Part2.zip and Part3.zip have been extracted and are available in the directory structure as follows:
 
-Lab1/
-|-- code/
-|   |__ (all logic files and notebooks)
-|-- Part2/
-|   |__ (all files/states for part 2 of the lab)
-| Part3/
-    |__ L8/
-    |__ L15/
+Lab1/\
+|-- code/\
+|   |__ (all logic files and notebooks)\
+|-- Part2/\
+|   |__ (all files/states for part 2 of the lab)\
+| Part3/\
+    |__ L8/\
+    |__ L15/\
     |__ L24/
 
-### Usage
+## Usage
 
-#### Components:
+### Components:
 
 - output/: A directory that stores the outputs of part 3 of the lab.
 
