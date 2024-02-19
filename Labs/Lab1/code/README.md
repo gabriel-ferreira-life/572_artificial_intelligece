@@ -10,13 +10,13 @@ All logic and instructions provided below assume that Part2.zip and Part3.zip ha
 
 Lab1/\
 |-- code/\
-|   |__ (all logic files and notebooks)\
+|     |__ (all logic files and notebooks)\
 |-- Part2/\
-|   |__ (all files/states for part 2 of the lab)\
-| Part3/\
-    |__ L8/\
-    |__ L15/\
-    |__ L24/
+|     |__ (all files/states for part 2 of the lab)\
+|-- Part3/\
+      |__ L8/\
+      |__ L15/\
+      |__ L24/
 
 ## Usage
 
