@@ -69,8 +69,12 @@ def func_output(algo, algorithm_name, problem, heuristic=None, display=True):
     seq_actions = solution.solution()
     path = solution.path()
     path_lenght = len(path)
-    tot_nodes_generated = len(explored) + len(frontier)
-
+    
+    try:
+        tot_nodes_generated = len(explored) + len(frontier)
+    except:
+        tot_nodes_generated = explored + len(frontier)
+    
     # edn timing
     end_time = time.perf_counter()
 
