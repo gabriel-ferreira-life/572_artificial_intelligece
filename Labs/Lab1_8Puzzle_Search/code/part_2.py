@@ -68,7 +68,7 @@ def func_output(algo, algorithm_name, problem, heuristic=None, display=True):
     # required output
     seq_actions = solution.solution()
     path = solution.path()
-    path_lenght = len(path)
+    path_lenght = len(path) - 1
     
     try:
         tot_nodes_generated = len(explored) + len(frontier)
