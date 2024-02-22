@@ -352,9 +352,17 @@ class EightPuzzle(Problem):
     
     
 # Heuristics for 8 Puzzle Problem
-def linear(node):
+def misplaced_tile(node):
+    state = node.state
     goal = (1, 2, 3, 4, 5, 6, 7, 8, 0)
-    return sum([1 if node.state[i] != goal[i] else 0 for i in range(8)])
+
+    misplaced_count = 0
+
+    for i in range(len(state)):
+        if state[i] != 0 and state[i] != goal[i]:
+            misplaced_count += 1
+
+    return misplaced_count
 
 def manhattan(node):
     state = node.state
@@ -374,6 +382,10 @@ def manhattan(node):
     
     return mhd
 
+def linear(node):
+    goal = (1, 2, 3, 4, 5, 6, 7, 8, 0)
+    return sum([1 if node.state[i] != goal[i] else 0 for i in range(8)])
+
 def max_heuristic(node):
     score1 = manhattan(node)
     score2 = linear(node)
@@ -382,13 +394,6 @@ def max_heuristic(node):
 
 # Algorithms
 def breadth_first_tree_search(problem):
-    """
-    [Figure 3.7]
-    Search the shallowest nodes in the search tree first.
-    Search through the successors of a problem to find a goal.
-    The argument frontier should be an empty queue.
-    Repeats infinitely in case of loops.
-    """
     explored = set()
     frontier = deque([Node(problem.initial)])  # FIFO queue
 
@@ -402,11 +407,6 @@ def breadth_first_tree_search(problem):
 
 
 def breadth_first_graph_search(problem):
-    """[Figure 3.11]
-    Note that this function can be implemented in a
-    single line as below:
-    return graph_search(problem, FIFOQueue())
-    """
     node = Node(problem.initial)
     frontier = deque([node])
     explored = set()
@@ -424,44 +424,46 @@ def breadth_first_graph_search(problem):
 
 
 def depth_limited_search(problem, limit=50):
-    """[Figure 3.17]"""
     explored = set()
-    def recursive_dls(node, problem, limit):
-        explored.add(node.state)
-        if problem.goal_test(node.state):
-            return node, explored
-        elif limit == 0:
-            return 'cutoff'
-        else:
-            cutoff_occurred = False
-            for child in node.expand(problem):
-                result = recursive_dls(child, problem, limit - 1)
-                if result == 'cutoff':
-                    cutoff_occurred = True
-                elif result is not None:
-                    return result
-            return 'cutoff' if cutoff_occurred else None
+    node_counter = {'count': 0}  
 
-    # Body of depth_limited_search:
-    return recursive_dls(Node(problem.initial), problem, limit)
+    def recursive_dls(node, problem, limit, depth=0):
+        node_counter['count'] += 1  
+        if node.state not in explored or depth < explored[node.state]:
+            explored[node.state] = depth
+            if problem.goal_test(node.state):
+                return node, node_counter['count']  
+            elif limit == 0:
+                return 'cutoff', None
+            else:
+                cutoff_occurred = False
+                for child in node.expand(problem):
+                    result, _ = recursive_dls(child, problem, limit - 1, depth + 1)
+                    if result == 'cutoff':
+                        cutoff_occurred = True
+                    elif result is not None:
+                        return result, node_counter['count']
+                return ('cutoff', None) if cutoff_occurred else (None, None)
+        return None, None
 
+    
+    explored = {}
+    
+    result, count = recursive_dls(Node(problem.initial), problem, limit)
+    return result, count
 
 def iterative_deepening_search(problem):
-    """[Figure 3.18]"""
+    total_nodes_visited = 0
     for depth in range(sys.maxsize):
-        result = depth_limited_search(problem, depth)
+        result, count = depth_limited_search(problem, depth)
+        if count:
+            total_nodes_visited += count
         if result != 'cutoff':
-            return result
+            return result, total_nodes_visited
+
         
 
 def best_first_graph_search(problem, f, display=False):
-    """Search the nodes with the lowest f scores first.
-    You specify the function f(node) that you want to minimize; for example,
-    if f is a heuristic estimate to the goal, then we have greedy best
-    first search; if f is node.depth then we have breadth-first search.
-    There is a subtlety: the line "f = memoize(f, 'f')" means that the f
-    values will be cached on the nodes as they are computed. So after doing
-    a best first search you can examine the f values of the path returned."""
     f = memoize(f, 'f')
     node = Node(problem.initial)
     frontier = PriorityQueue('min', f)
@@ -484,26 +486,17 @@ def best_first_graph_search(problem, f, display=False):
     return None, explored, frontier
 
         
-def astar_search(problem, h=None, display=False):
-    """A* search is best-first graph search with f(n) = g(n)+h(n).
-    You need to specify the h function when you call astar_search, or
-    else in your Problem subclass."""
+def astar_search_1(problem, h=misplaced_tile, display=False):
     h = memoize(h or problem.h, 'h')
     solution, explored, frontier = best_first_graph_search(problem, lambda n: n.path_cost + h(n), display) 
     return solution, explored, frontier
 
 def astar_search_2(problem, h=manhattan, display=False):
-    """A* search is best-first graph search with f(n) = g(n)+h(n).
-    You need to specify the h function when you call astar_search, or
-    else in your Problem subclass."""
     h = memoize(h or problem.h, 'h')
     solution, explored, frontier = best_first_graph_search(problem, lambda n: n.path_cost + h(n), display)
     return solution, explored, frontier
 
 def astar_search_3(problem, h=max_heuristic, display=False):
-    """A* search is best-first graph search with f(n) = g(n)+h(n).
-    You need to specify the h function when you call astar_search, or
-    else in your Problem subclass."""
     h = memoize(h or problem.h, 'h')
     solution, explored, frontier = best_first_graph_search(problem, lambda n: n.path_cost + h(n), display) 
     return solution, explored, frontier

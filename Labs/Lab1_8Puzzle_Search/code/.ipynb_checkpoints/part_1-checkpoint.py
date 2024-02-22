@@ -1,9 +1,9 @@
-# Libraries
+  # Libraries
 import sys
 from collections import deque
 import heapq
 import math
-import glob
+
 from ipywidgets import interact
 import ipywidgets as widgets
 from IPython.display import display
@@ -68,8 +68,11 @@ def func_output(algo, algorithm_name, problem, heuristic=None, display=True):
     # required output
     seq_actions = solution.solution()
     path = solution.path()
-    path_lenght = len(path)
-    tot_nodes_generated = len(explored) + len(frontier)
+    path_lenght = len(path) - 1
+    try:
+        tot_nodes_generated = len(explored) + len(frontier)
+    except:
+        tot_nodes_generated = explored + len(frontier)
 
     # edn timing
     end_time = time.perf_counter()
@@ -128,15 +131,10 @@ def puzzle_8_solver(file_path, algorithm):
         print("Path: Timed out")
 
 # request user input
-print("Insert folder path and desired algorithm (BFGS, BFTS, IDS, h1, h2, h3).")
-folder_path = input("Folder path: ")
+print("Insert file path and desired algorithm (BFGS, BFTS, IDS, h1, h2, h3).")
+file_path = input("File path: ")
 algorithm = input("Algorithm: ")
 print("")
 
-# solving all puzzles in the folder
-folder = folder_path + "/*.txt"
-for file in glob.glob(folder):
-    print("Solving problem for file: ", file, "\n")
-
-    puzzle_8_solver(file, algorithm)
-    print(" ")
+# calling Function
+puzzle_8_solver(file_path, algorithm)

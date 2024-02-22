@@ -425,31 +425,42 @@ def breadth_first_graph_search(problem):
 
 def depth_limited_search(problem, limit=50):
     explored = set()
-    def recursive_dls(node, problem, limit):
-        explored.add(node.state)
-        if problem.goal_test(node.state):
-            return node, explored
-        elif limit == 0:
-            return 'cutoff'
-        else:
-            cutoff_occurred = False
-            for child in node.expand(problem):
-                result = recursive_dls(child, problem, limit - 1)
-                if result == 'cutoff':
-                    cutoff_occurred = True
-                elif result is not None:
-                    return result
-            return 'cutoff' if cutoff_occurred else None
+    node_counter = {'count': 0}  
 
-    # Body of depth_limited_search:
-    return recursive_dls(Node(problem.initial), problem, limit)
+    def recursive_dls(node, problem, limit, depth=0):
+        node_counter['count'] += 1  
+        if node.state not in explored or depth < explored[node.state]:
+            explored[node.state] = depth
+            if problem.goal_test(node.state):
+                return node, node_counter['count']  
+            elif limit == 0:
+                return 'cutoff', None
+            else:
+                cutoff_occurred = False
+                for child in node.expand(problem):
+                    result, _ = recursive_dls(child, problem, limit - 1, depth + 1)
+                    if result == 'cutoff':
+                        cutoff_occurred = True
+                    elif result is not None:
+                        return result, node_counter['count']
+                return ('cutoff', None) if cutoff_occurred else (None, None)
+        return None, None
 
+    
+    explored = {}
+    
+    result, count = recursive_dls(Node(problem.initial), problem, limit)
+    return result, count
 
 def iterative_deepening_search(problem):
+    total_nodes_visited = 0
     for depth in range(sys.maxsize):
-        result = depth_limited_search(problem, depth)
+        result, count = depth_limited_search(problem, depth)
+        if count:
+            total_nodes_visited += count
         if result != 'cutoff':
-            return result
+            return result, total_nodes_visited
+
         
 
 def best_first_graph_search(problem, f, display=False):
