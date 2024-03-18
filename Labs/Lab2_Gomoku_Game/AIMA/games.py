@@ -55,10 +55,11 @@ def alpha_beta_search(state, game):
     return best_action
 
 
-def alpha_beta_cutoff_search(state, game, d=20, cutoff_test=None, eval_fn=None):
+def alpha_beta_cutoff_search(state, game, d=None, cutoff_test=None, eval_fn=None):
     """Search game to determine best action; use alpha-beta pruning.
     This version cuts off search and uses an evaluation function."""
-
+    
+    print("Depth: ", d)
     player = game.to_move(state)
 
     # Functions used by alpha_beta
@@ -100,8 +101,9 @@ def alpha_beta_cutoff_search(state, game, d=20, cutoff_test=None, eval_fn=None):
 
 # ______________________________________________________________________________
 # Heuristic
-def evaluate_game_state(state, player):
-    opponent = 'O' if player == 'X' else 'X'
+def evaluate_game_state(state):
+    player = state.to_move
+    opponent = 'W' if player == 'B' else 'B'
     score = 0
     
     # Example simple heuristic: Count the number of player's stones vs opponent's stones
@@ -110,27 +112,9 @@ def evaluate_game_state(state, player):
     score = player_stones - opponent_stones
 
     # You could extend this by evaluating specific patterns or sequences that are advantageous
-    print("Score: ", score)
+#     print("Score: ", score)
     return score
 
-
-
-def heuristic(game, state):
-    # Assuming 'X' is the maximizing player and 'O' is the minimizing player.
-    player = game.to_move(state)
-    opponent = 'O' if player == 'X' else 'X'
-    
-    score = 0
-    # You need to define or implement the count_open_lines and count_threat_spaces functions.
-    open_lines_X, open_lines_O = count_open_lines(state, 'X'), count_open_lines(state, 'O')
-    threats_X, threats_O = count_threat_spaces(state, 'X'), count_threat_spaces(state, 'O')
-    
-    if player == 'X':
-        score += (open_lines_X - open_lines_O) * 10 + (threats_X - threats_O) * 100
-    else:
-        score -= (open_lines_X - open_lines_O) * 10 + (threats_X - threats_O) * 100
-    
-    return score
 
 # Placeholder for actual implementation
 def count_open_lines(game, state, player):
@@ -151,7 +135,7 @@ def query_player(game, state):
     """Make a move by querying standard input."""
     print("current state:")
     game.display(state)
-    print("available moves: {}".format(game.actions(state)))
+    print("List of legal moves at this state: {}".format(game.actions(state)))
     print("")
     move = None
     if game.actions(state):
@@ -169,9 +153,10 @@ def random_player(game, state):
     """A player that chooses a legal move at random."""
     return random.choice(game.actions(state)) if game.actions(state) else None
 
-
-def alpha_beta_player(game, state):
-    return alpha_beta_cutoff_search(state, game, None, evaluate_game_state)
+def alpha_beta_player(depth):
+    def alpha_beta_player_sub(game, state):
+        return alpha_beta_cutoff_search(state, game, depth, None, evaluate_game_state)
+    return alpha_beta_player_sub
 
 # ______________________________________________________________________________
 # Some Sample Games
@@ -226,10 +211,10 @@ class Game:
 
 
 class TicTacToe(Game):
-    """Play TicTacToe on an h x v board, with Max (first player) playing 'X'.
+    """Play TicTacToe on an h x v board, with Max (first player) playing 'B'.
     A state has the player to move, a cached utility, a list of moves in
     the form of a list of (x, y) positions, and a board, in the form of
-    a dict of {(x, y): Player} entries, where Player is 'X' or 'O'."""
+    a dict of {(x, y): Player} entries, where Player is 'B' or 'W'."""
 
     def __init__(self, h=3, v=3, k=3):
         self.h = h
@@ -237,7 +222,7 @@ class TicTacToe(Game):
         self.k = k
         moves = [(x, y) for x in range(1, h + 1)
                  for y in range(1, v + 1)]
-        self.initial = GameState(to_move='X', utility=0, board={}, moves=moves)
+        self.initial = GameState(to_move='B', utility=0, board={}, moves=moves)
 
     def actions(self, state):
         """Legal moves are any square not yet taken."""
@@ -250,13 +235,13 @@ class TicTacToe(Game):
         board[move] = state.to_move
         moves = list(state.moves)
         moves.remove(move)
-        return GameState(to_move=('O' if state.to_move == 'X' else 'X'),
+        return GameState(to_move=('W' if state.to_move == 'B' else 'B'),
                          utility=self.compute_utility(board, move, state.to_move),
                          board=board, moves=moves)
 
     def utility(self, state, player):
         """Return the value to player; 1 for win, -1 for loss, 0 otherwise."""
-        return state.utility if player == 'X' else -state.utility
+        return state.utility if player == 'B' else -state.utility
 
     def terminal_test(self, state):
         """A state is terminal if it is won or there are no empty squares."""
@@ -270,12 +255,12 @@ class TicTacToe(Game):
             print()
 
     def compute_utility(self, board, move, player):
-        """If 'X' wins with this move, return 1; if 'O' wins return -1; else return 0."""
+        """If 'B' wins with this move, return 1; if 'W' wins return -1; else return 0."""
         if (self.k_in_row(board, move, player, (0, 1)) or
                 self.k_in_row(board, move, player, (1, 0)) or
                 self.k_in_row(board, move, player, (1, -1)) or
                 self.k_in_row(board, move, player, (1, 1))):
-            return +1 if player == 'X' else -1
+            return +1 if player == 'B' else -1
         else:
             return 0
 
@@ -299,7 +284,7 @@ class Gomoku(TicTacToe):
         super().__init__(h, v, k)
         center = ((h // 2) + 1, (v // 2) + 1)
         # Initialize the board with the first move at the center
-        self.initial = GameState(to_move='O', utility=0, board={center: 'X'}, moves=self.calculate_initial_moves(center))
+        self.initial = GameState(to_move='W', utility=0, board={center: 'B'}, moves=self.calculate_initial_moves(center))
 
     def calculate_initial_moves(self, center):
         moves = [(x, y) for x in range(1, self.h + 1) for y in range(1, self.v + 1)]
@@ -307,7 +292,7 @@ class Gomoku(TicTacToe):
         return moves
 
     def actions(self, state):
-        if list(state.board.values()).count('X') == 1 and state.to_move == 'X':
+        if list(state.board.values()).count('B') == 1 and state.to_move == 'B':
             center = ((self.h // 2) + 1, (self.v // 2) + 1)
             return [(x, y) for x in range(1, self.h + 1) for y in range(1, self.v + 1)
                     if max(abs(x - center[0]), abs(y - center[1])) >= 3 and (x, y) not in state.board]
