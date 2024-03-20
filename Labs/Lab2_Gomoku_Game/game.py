@@ -1,165 +1,12 @@
-"""Games or Adversarial Search (Chapter 5)"""
-
 import copy
 import itertools
 import random
 from collections import namedtuple
-
 import numpy as np
-
-# from utils import vector_add
 
 GameState = namedtuple('GameState', 'to_move, utility, board, moves')
 StochasticGameState = namedtuple('StochasticGameState', 'to_move, utility, board, moves, chance')
 
-
-
-def alpha_beta_search(state, game):
-    """Search game to determine best action; use alpha-beta pruning.
-    As in [Figure 5.7], this version searches all the way to the leaves."""
-
-    player = game.to_move(state)
-
-    # Functions used by alpha_beta
-    def max_value(state, alpha, beta):
-        if game.terminal_test(state):
-            return game.utility(state, player)
-        v = -np.inf
-        for a in game.actions(state):
-            v = max(v, min_value(game.result(state, a), alpha, beta))
-            if v >= beta:
-                return v
-            alpha = max(alpha, v)
-        return v
-
-    def min_value(state, alpha, beta):
-        if game.terminal_test(state):
-            return game.utility(state, player)
-        v = np.inf
-        for a in game.actions(state):
-            v = min(v, max_value(game.result(state, a), alpha, beta))
-            if v <= alpha:
-                return v
-            beta = min(beta, v)
-        return v
-
-    # Body of alpha_beta_search:
-    best_score = -np.inf
-    beta = np.inf
-    best_action = None
-    for a in game.actions(state):
-        v = min_value(game.result(state, a), best_score, beta)
-        if v > best_score:
-            best_score = v
-            best_action = a
-    return best_action
-
-
-def alpha_beta_cutoff_search(state, game, d=None, cutoff_test=None, eval_fn=None):
-    """Search game to determine best action; use alpha-beta pruning.
-    This version cuts off search and uses an evaluation function."""
-    
-    print("Depth: ", d)
-    player = game.to_move(state)
-
-    # Functions used by alpha_beta
-    def max_value(state, alpha, beta, depth):
-        if cutoff_test(state, depth):
-            return eval_fn(state)
-        v = -np.inf
-        for a in game.actions(state):
-            v = max(v, min_value(game.result(state, a), alpha, beta, depth + 1))
-            if v >= beta:
-                return v
-            alpha = max(alpha, v)
-        return v
-
-    def min_value(state, alpha, beta, depth):
-        if cutoff_test(state, depth):
-            return eval_fn(state)
-        v = np.inf
-        for a in game.actions(state):
-            v = min(v, max_value(game.result(state, a), alpha, beta, depth + 1))
-            if v <= alpha:
-                return v
-            beta = min(beta, v)
-        return v
-
-    # Body of alpha_beta_cutoff_search starts here:
-    # The default test cuts off at depth d or at a terminal state
-    cutoff_test = (cutoff_test or (lambda state, depth: depth > d or game.terminal_test(state)))
-    eval_fn = eval_fn or (lambda state: game.utility(state, player))
-    best_score = -np.inf
-    beta = np.inf
-    best_action = None
-    for a in game.actions(state):
-        v = min_value(game.result(state, a), best_score, beta, 1)
-        if v > best_score:
-            best_score = v
-            best_action = a
-    return best_action
-
-# ______________________________________________________________________________
-# Heuristic
-def evaluate_game_state(state):
-    player = state.to_move
-    opponent = 'W' if player == 'B' else 'B'
-    score = 0
-    
-    # Example simple heuristic: Count the number of player's stones vs opponent's stones
-    player_stones = sum(1 for pos, occupant in state.board.items() if occupant == player)
-    opponent_stones = sum(1 for pos, occupant in state.board.items() if occupant == opponent)
-    score = player_stones - opponent_stones
-
-    # You could extend this by evaluating specific patterns or sequences that are advantageous
-#     print("Score: ", score)
-    return score
-
-
-# Placeholder for actual implementation
-def count_open_lines(game, state, player):
-    # Implement logic to count open lines for the player
-    return 0
-
-def count_threat_spaces(game, state, player):
-    # Implement logic to count immediate winning moves (threat spaces)
-    return 0
-
-
-
-# ______________________________________________________________________________
-# Players for Games
-
-
-def query_player(game, state):
-    """Make a move by querying standard input."""
-    print("current state:")
-    game.display(state)
-    print("List of legal moves at this state: {}".format(game.actions(state)))
-    print("")
-    move = None
-    if game.actions(state):
-        move_string = input('Your move? ')
-        try:
-            move = eval(move_string)
-        except NameError:
-            move = move_string
-    else:
-        print('no legal moves: passing turn to next player')
-    return move
-
-
-def random_player(game, state):
-    """A player that chooses a legal move at random."""
-    return random.choice(game.actions(state)) if game.actions(state) else None
-
-def alpha_beta_player(depth):
-    def alpha_beta_player_sub(game, state):
-        return alpha_beta_cutoff_search(state, game, depth, None, evaluate_game_state)
-    return alpha_beta_player_sub
-
-# ______________________________________________________________________________
-# Some Sample Games
 
 
 class Game:
@@ -197,18 +44,48 @@ class Game:
 
     def __repr__(self):
         return '<{}>'.format(self.__class__.__name__)
+    
 
-    def play_game(self, *players):
+
+    def play_game(self, player1, player2):
         """Play an n-person, move-alternating game."""
+
+        # Assign colors based on argument position
+        self.players = { 'B': player1, 'W': player2 }
+
         state = self.initial
         while True:
-            for player in players:
-                move = player(self, state)
-                state = self.result(state, move)
-                if self.terminal_test(state):
-                    self.display(state)
-                    return self.utility(state, self.to_move(self.initial))
+            # Determine the current player ('B' or 'W')
+            current_player = self.to_move(state)
+            
+            # Fetch the player function based on the current player's role
+            player_func = self.players[current_player]
+            
+            # Call the player function to get the move
+            move = player_func(self, state)
+            
+            # Apply the move to get the new state
+            state = self.result(state, move)
+            
+            # Check if the game has reached a terminal state
+            if self.terminal_test(state):
+                self.display(state)
 
+                # Determine and display the game outcome
+                if self.utility(state, 'B') > 0:
+                    print("Black wins!")
+                    return 1
+      
+                elif self.utility(state, 'B') < 0:
+                    print("White wins!")
+                    return -1
+  
+                else:
+                    print("It's a draw.")
+                    return 0
+
+                
+                
 
 class TicTacToe(Game):
     """Play TicTacToe on an h x v board, with Max (first player) playing 'B'.
@@ -225,7 +102,6 @@ class TicTacToe(Game):
         self.initial = GameState(to_move='B', utility=0, board={}, moves=moves)
 
     def actions(self, state):
-        """Legal moves are any square not yet taken."""
         return state.moves
 
     def result(self, state, move):
@@ -279,10 +155,13 @@ class TicTacToe(Game):
         n -= 1  # Because we counted move itself twice
         return n >= self.k
 
+    
+    
 class Gomoku(TicTacToe):
     def __init__(self, h=15, v=15, k=5):
         super().__init__(h, v, k)
         center = ((h // 2) + 1, (v // 2) + 1)
+        
         # Initialize the board with the first move at the center
         self.initial = GameState(to_move='W', utility=0, board={center: 'B'}, moves=self.calculate_initial_moves(center))
 
