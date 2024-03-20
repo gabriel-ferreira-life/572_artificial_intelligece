@@ -3,7 +3,7 @@ from players import *
 
 def main():
     gomoku = Gomoku()
-    depth = 3  # depth for the alpha-beta player
+    depth = 2  # depth for the alpha-beta player
     
     # Ask the user for their preferred color
     player_color = input("Choose your color (B for Black, W for White): ").strip().upper()
@@ -12,7 +12,7 @@ def main():
         player_color = input("Choose your color (B for Black, W for White): ").strip().upper()
     
     # Assign players based on the user's choice
-    if player_color == 'W':
+    if player_color == 'B':
         player1, player2 = human_player, alpha_beta_player(depth=depth, evaluation_func=evaluate_game_state_improved)
     else:
         player1, player2 = alpha_beta_player(depth=depth, evaluation_func=evaluate_game_state_improved), human_player
