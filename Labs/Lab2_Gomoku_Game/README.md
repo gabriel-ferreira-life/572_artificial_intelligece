@@ -1,28 +1,21 @@
-# Lab2: Gomoku Game and Analysis
+# Lab 2: Gomoku Game Implementation and Analysis
 
-This suite of Python files facilitates playing the Gomoku game ("Five in a Row"), implementing various player strategies, and analyzing gameplay outcomes.
+This repository contains a Python implementation of the Gomoku game (also known as Five in a Row), along with utilities for playing the game, implementing various player strategies, and analyzing gameplay. Below is an overview of each file and its role in the project.
 
 ## Overview
 
-game.py: Core game logic, including board state and game rules.
-play_gomoku.py: Script for running Gomoku games with customizable player settings.
-players.py: Definitions for different player types, including AI and human players.
-play_analysis.ipynb: Jupyter notebook for game strategy analysis and visualization.
-utils.py: Utility functions supporting game operations and analysis.
-Usage
+**game.py:** Defines the core game logic for Gomoku, including the board representation, game state, and rules for making moves. It provides the foundational classes and methods used by other components.
 
-Play the Game
-Execute play_gomoku.py to start a game. Modify the script to configure player types and strategies.
+**utils.py:** Provides utility functions and helpers that support game setup, execution, and analysis.
 
-Analyze Gameplay
-Open play_analysis.ipynb in a Jupyter environment for simulation and analysis tools.
+**players.py:** Contains implementations of different player types, including human player, AI players using the Alpha-Beta pruning algorithm, and random players. **Note the human player implementation will provide a list of all legal moves at each play as asked in the instructions.**
 
-Customize Strategies
-Alter players.py to experiment with or introduce new player strategies.
+**play_gomoku.py:** A script that sets up and runs a Gomoku game instance. Use this script to play Gomoku using the command line.
 
-Getting Started
+**play_analysis.ipynb:** A Jupyter notebook for analyzing different depths and evaluation functions as requested by the lab intrunctions. It includes code for running simulations, collecting gameplay metrics (like win rates and decision times), and visualizing results. 
 
-Ensure Python is installed with required libraries (numpy, matplotlib). Run play_gomoku.py to play or play_analysis.ipynb for analysis.
+## Playing the Game
+Run the **play_gomoku.py** script to start a game. You can modify this script to set up specific player configurations (e.g. different depths), or setting two AI players to play against each other.
 
 ## Acknowledgments
 - [GitHub Pages] https://github.com/aimacode 
