@@ -1,0 +1,7 @@
+game_depth,move_counts,avg_decision_times,avg_move_scores,avg_game_times,outcome
+1,11,0.55,5.5,5.54,1
+1,7,0.5,3.83,3.02,1
+1,12,0.56,5.95,6.14,1
+2,6,7.01,2.0,35.04,1
+2,8,8.79,2.86,61.5,1
+2,6,7.14,2.0,35.7,1

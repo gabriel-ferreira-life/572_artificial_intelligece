@@ -3,15 +3,49 @@ import itertools
 import random
 from collections import namedtuple
 import numpy as np
+import time
 
 
 # Players for Games
+move_times = []
+move_scores = []
 def alpha_beta_player(depth, evaluation_func):
     def alpha_beta_player_sub(game, state):
-        return alpha_beta_cutoff_search(state, game, depth, None, evaluation_func)
+        start = time.time()
+        action = alpha_beta_cutoff_search(state, game, depth, None, evaluation_func)
+        move_times.append(time.time() - start)
+        return action
     return alpha_beta_player_sub
 
+# decision time
+def get_average_decision_time():
+    global move_times
+    avg_move_time = np.mean(move_times) if move_times else float('inf')
+    return round(avg_move_time, 2)
 
+# number of moves
+def reset_move_metrics():
+    global move_times
+    move_times = []
+    
+def get_player_move_times():
+    return len(move_times.copy())+1
+
+
+# move scores
+def reset_score_metrics():
+    global move_scores
+    move_scores = []
+    
+def get_average_score():
+    global move_scores
+    return np.mean(move_scores) if move_scores else float('inf')
+
+def get_move_scores():
+    return move_scores.copy()
+
+
+# human player
 def human_player(game, state):
     print("Current board state:")
     game.display(state)
@@ -76,6 +110,8 @@ def alpha_beta_cutoff_search(state, game, d=None, cutoff_test=None, eval_fn=None
         if v > best_score:
             best_score = v
             best_action = a
+            
+    move_scores.append(best_action) # store the scores
     return best_action
 
 # ______________________________________________________________________________
@@ -168,5 +204,57 @@ def evaluate_game_state_improved(state, game):
     return score
 
 
+## get_score heuristic
+def get_score(state, game):
+    total_score = 0
+    already_existing_head_tails = set()
+    score = {1: 10, 2: 100, 3: 1000, 4: 10000, 5: float('inf')}
 
+    directions = [(1, 0), (0, 1)]
+    current_player = state.to_move 
+    for move, player in state.board.items():
+        if player == current_player:
+            for vector in directions:
+                head = (move[0] + vector[0], move[1] + vector[1])
+                tail = (move[0] - vector[0], move[1] - vector[1])
+                cur_len = 1
+                head_block = tail_block = False
 
+                 # Expand head (early stopping)
+                while state.board.get(head) == current_player and state.board.get(head[0] + vector[0], head[1] + vector[1]) != 'W':
+                    head = (head[0] + vector[0], head[1] + vector[1])
+                    cur_len += 1
+
+                # Check head blocking
+                if state.board.get(head) != 'W' and state.board.get(head) is not None:
+                    head_block = True
+
+                # Reset head to one step back
+                head = (head[0] - vector[0], head[1] - vector[1])
+
+                while state.board.get(tail) == current_player and state.board.get(tail[0] - vector[0], tail[1] - vector[1]) != 'W':
+                    tail = (tail[0] - vector[0], tail[1] - vector[1])
+                    cur_len += 1
+                    
+                # Check tail blocking
+                if state.board.get(tail) != 'W' and state.board.get(tail) is not None:
+                    tail_block = True
+
+                # Reset tail to one step back
+                tail = (tail[0] + vector[0], tail[1] + vector[1])
+
+                headTail = (head, tail)
+                if headTail not in already_existing_head_tails:
+                    already_existing_head_tails.add(headTail)
+                    if cur_len >= 5:
+                        return score[5]
+                    if (head_block and not tail_block) or (not head_block and tail_block):
+                        if cur_len == 4:  # Forced win
+                            total_score += 10000
+                        else:
+                            total_score += score[cur_len]
+                    if not (head_block or tail_block):
+                        if cur_len == 4: total_score += 1000
+                        total_score += 2 * score[cur_len]
+
+    return total_score
