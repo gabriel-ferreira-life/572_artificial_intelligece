@@ -3,15 +3,49 @@ import itertools
 import random
 from collections import namedtuple
 import numpy as np
+import time
 
 
 # Players for Games
+move_times = []
+move_scores = []
 def alpha_beta_player(depth, evaluation_func):
     def alpha_beta_player_sub(game, state):
-        return alpha_beta_cutoff_search(state, game, depth, None, evaluation_func)
+        start = time.time()
+        action = alpha_beta_cutoff_search(state, game, depth, None, evaluation_func)
+        move_times.append(time.time() - start)
+        return action
     return alpha_beta_player_sub
 
+# decision time
+def get_average_decision_time():
+    global move_times
+    avg_move_time = np.mean(move_times) if move_times else float('inf')
+    return round(avg_move_time, 2)
 
+# number of moves
+def reset_move_metrics():
+    global move_times
+    move_times = []
+    
+def get_player_move_times():
+    return len(move_times.copy())+1
+
+
+# move scores
+def reset_score_metrics():
+    global move_scores
+    move_scores = []
+    
+def get_average_score():
+    global move_scores
+    return np.mean(move_scores) if move_scores else float('inf')
+
+def get_move_scores():
+    return move_scores.copy()
+
+
+# human player
 def human_player(game, state):
     print("Current board state:")
     game.display(state)
@@ -76,6 +110,8 @@ def alpha_beta_cutoff_search(state, game, d=None, cutoff_test=None, eval_fn=None
         if v > best_score:
             best_score = v
             best_action = a
+            
+    move_scores.append(best_action) # store the scores
     return best_action
 
 # ______________________________________________________________________________
@@ -88,7 +124,7 @@ def count_threat_spaces(game, state, player):
 
 def evaluate_game_state_simple(state, game):
     player = state.to_move
-    opponent = 'W' if player == 'B' else 'B'
+    opponent = 'B' if player == 'B' else 'W'
     score = 0
     
     # Count the number of player's stones vs opponent's stones
@@ -134,7 +170,7 @@ def position_value(pos):
 
 def evaluate_game_state_improved(state, game):
     player = state.to_move
-    opponent = 'O' if player == 'X' else 'X'
+    opponent = 'B' if player == 'B' else 'W'
     score = 0
 
     # Count stones for a basic score
@@ -166,7 +202,3 @@ def evaluate_game_state_improved(state, game):
             score -= position_value(pos)
 
     return score
-
-
-
-

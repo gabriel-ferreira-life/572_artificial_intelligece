@@ -47,26 +47,43 @@ class Game:
     
 
 
-    def play_game(self, *players):
+    def play_game(self, player1, player2):
         """Play an n-person, move-alternating game."""
+
+        # Assign colors based on argument position
+        self.players = { 'B': player1, 'W': player2 }
+
         state = self.initial
         while True:
-            for player in players:
-                move = player(self, state)
-                state = self.result(state, move)
-                if self.terminal_test(state):
-                    self.display(state)
-                    
-                    """Prints the winner of the game based on the utility of the final state."""
-                    if self.utility(state, 'B') > 0:  # Assuming positive utility indicates a win for 'B'
-                        print("Black is the winner!")
-                    elif self.utility(state, 'B') < 0:  # Negative utility indicates a win for 'W'
-                        print("White is the winner!")
-                    else:  # Zero utility indicates a draw
-                        print("The game is a draw.")
-                        
-                    
-                    return self.utility(state, self.to_move(self.initial))
+            # Determine the current player ('B' or 'W')
+            current_player = self.to_move(state)
+            
+            # Fetch the player function based on the current player's role
+            player_func = self.players[current_player]
+            
+            # Call the player function to get the move
+            move = player_func(self, state)
+            
+            # Apply the move to get the new state
+            state = self.result(state, move)
+            
+            # Check if the game has reached a terminal state
+            if self.terminal_test(state):
+                self.display(state)
+
+                # Determine and display the game outcome
+                if self.utility(state, 'B') > 0:
+                    print("Black wins!")
+                    return 1
+      
+                elif self.utility(state, 'B') < 0:
+                    print("White wins!")
+                    return -1
+  
+                else:
+                    print("It's a draw.")
+                    return 0
+
                 
                 
 

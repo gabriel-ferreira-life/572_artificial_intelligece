@@ -1,0 +1,4 @@
+evaluation_function,game_depth,move_counts,avg_decision_times,avg_move_scores,avg_game_times,outcome
+simple,2,6,0.58,2.0,2.88,1
+simple,2,6,0.56,2.0,2.81,1
+simple,2,6,0.57,2.0,2.86,1
