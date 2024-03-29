@@ -1,9 +1,10 @@
 from game import * 
 from players import * 
+import numpy as np
 
 def main():
     gomoku = Gomoku()
-    depth = 2  # depth for the alpha-beta player
+    depth = 2# depth for the alpha-beta player
     
     # Ask the user for their preferred color
     player_color = input("Choose your color (B for Black, W for White): ").strip().upper()
