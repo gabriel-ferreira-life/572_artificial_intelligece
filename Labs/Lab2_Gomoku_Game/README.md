@@ -12,7 +12,9 @@ This repository contains a Python implementation of the Gomoku game (also known 
 
 **play_gomoku.py:** A script that sets up and runs a Gomoku game instance. Use this script to play Gomoku using the command line.
 
-**play_analysis.ipynb:** A Jupyter notebook for analyzing different depths and evaluation functions as requested by the lab intrunctions. It includes code for running simulations, collecting gameplay metrics (like win rates and decision times), and visualizing results. 
+**play_analysis.ipynb:** A Jupyter notebook for analyzing different depths and evaluation functions as requested by the lab intrunctions. It includes code for running simulations, collecting gameplay metrics (llike win rates, decision times, etc). 
+
+**play_analysis_eval_func.ipynb:** A Jupyter notebook for analyzing differentevaluation functions as requested by the lab intrunctions. It includes code for running simulations, collecting gameplay metrics (like win rates, decision times, etc). 
 
 ## Playing the Game
 Run the **play_gomoku.py** script to start a game. You can modify this script to set up specific player configurations (e.g. different depths), or setting two AI players to play against each other.
